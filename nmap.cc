@@ -2258,23 +2258,18 @@ int nmap_main(int argc, char *argv[]) {
       currenths = Targets[targetno];
       /* Now I can do the output and such for each host */
       if (currenths->timedOut(NULL)) {
-        xml_open_start_tag("host");
-        xml_attribute("starttime", "%lu", (unsigned long) currenths->StartTime());
-        xml_attribute("endtime", "%lu", (unsigned long) currenths->EndTime());
-        xml_close_start_tag();
-        write_host_header(currenths);
-        xml_end_tag(); /* host */
-        xml_newline();
-        log_write(LOG_PLAIN, "Skipping host %s due to host timeout\n",
+        log_write(LOG_PLAIN, "Partial results for %s due to host timeout:\n",
                   currenths->NameIP(hostname, sizeof(hostname)));
         log_write(LOG_MACHINE, "Host: %s (%s)\tStatus: Timeout\n",
                   currenths->targetipstr(), currenths->HostName());
+        xml_open_start_tag("hosthint");
       } else {
         /* --open means don't show any hosts without open ports. */
         if (o.openOnly() && !currenths->ports.hasOpenPorts())
           continue;
-
         xml_open_start_tag("host");
+      }
+
         xml_attribute("starttime", "%lu", (unsigned long) currenths->StartTime());
         xml_attribute("endtime", "%lu", (unsigned long) currenths->EndTime());
         xml_close_start_tag();
@@ -2292,7 +2287,6 @@ int nmap_main(int argc, char *argv[]) {
         log_write(LOG_PLAIN | LOG_MACHINE, "\n");
         xml_end_tag(); /* host */
         xml_newline();
-      }
     }
     log_flush_all();
 
